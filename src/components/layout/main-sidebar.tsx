@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -48,8 +49,9 @@ export function MainSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href} passHref>
                 <SidebarMenuButton
+                  asChild
                   isActive={pathname === item.href}
                   tooltip={{
                     children: item.label,
@@ -59,8 +61,10 @@ export function MainSidebar() {
                     'group-data-[collapsible=icon]:justify-center'
                   )}
                 >
-                  <item.icon className="shrink-0" />
-                  <span className="truncate">{item.label}</span>
+                  <a>
+                    <item.icon className="shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </a>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
