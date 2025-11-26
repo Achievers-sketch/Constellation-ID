@@ -5,6 +5,7 @@ import {
   estimateRegistrationCost,
   type EstimateRegistrationCostInput,
 } from '@/ai/flows/cost-monitoring-tool';
+import Web3 from 'web3';
 
 export async function getCostEstimation(input: EstimateRegistrationCostInput) {
   try {
@@ -17,4 +18,14 @@ export async function getCostEstimation(input: EstimateRegistrationCostInput) {
     }
     return { success: false, error: 'An unknown error occurred.' };
   }
+}
+
+export async function verifyIdentity(
+  address: string
+): Promise<{ status: 'valid' | 'invalid' }> {
+  const web3 = new Web3();
+  if (web3.utils.isAddress(address)) {
+    return { status: 'valid' };
+  }
+  return { status: 'invalid' };
 }

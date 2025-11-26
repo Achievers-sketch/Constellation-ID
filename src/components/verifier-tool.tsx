@@ -12,41 +12,30 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  CheckCircle2,
   HelpCircle,
   Loader2,
-  ShieldAlert,
   ShieldCheck,
   ShieldX,
-  XCircle,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { verifyIdentity } from '@/app/actions';
 
 type VerificationStatus =
   | 'idle'
   | 'verifying'
   | 'valid'
-  | 'invalid'
-  | 'revoked';
+  | 'invalid';
 
 export function VerifierTool() {
   const [status, setStatus] = useState<VerificationStatus>('idle');
   const [qrData, setQrData] = useState('');
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (!qrData) return;
     setStatus('verifying');
 
-    // Mock verification logic
-    setTimeout(() => {
-      if (qrData.includes('valid')) {
-        setStatus('valid');
-      } else if (qrData.includes('revoked')) {
-        setStatus('revoked');
-      } else {
-        setStatus('invalid');
-      }
-    }, 1500);
+    const result = await verifyIdentity(qrData);
+    setStatus(result.status);
   };
 
   const renderStatusAlert = () => {
@@ -57,7 +46,7 @@ export function VerifierTool() {
             <ShieldCheck className="h-5 w-5 text-green-500" />
             <AlertTitle className="font-bold">Identity Valid</AlertTitle>
             <AlertDescription>
-              This identity has been successfully verified on the blockchain.
+              This identity address has been successfully validated.
             </AlertDescription>
           </Alert>
         );
@@ -67,17 +56,7 @@ export function VerifierTool() {
             <ShieldX className="h-5 w-5" />
             <AlertTitle className="font-bold">Identity Invalid</AlertTitle>
             <AlertDescription>
-              This identity could not be found or verified on the blockchain.
-            </AlertDescription>
-          </Alert>
-        );
-      case 'revoked':
-        return (
-          <Alert variant="destructive" className="border-yellow-500 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400">
-            <ShieldAlert className="h-5 w-5 text-yellow-500" />
-            <AlertTitle className="font-bold">Identity Revoked</AlertTitle>
-            <AlertDescription>
-              This identity has been revoked by its owner.
+              This is not a valid Ethereum address.
             </AlertDescription>
           </Alert>
         );
@@ -87,7 +66,7 @@ export function VerifierTool() {
             <HelpCircle className="h-5 w-5 text-blue-500" />
             <AlertTitle>Ready to Verify</AlertTitle>
             <AlertDescription>
-              Paste the identity data from a QR code to begin verification.
+              Paste the identity data (e.g., an Ethereum address) to begin verification.
             </AlertDescription>
           </Alert>
         );
@@ -97,7 +76,7 @@ export function VerifierTool() {
             <Loader2 className="h-5 w-5 animate-spin" />
             <AlertTitle>Verifying Identity</AlertTitle>
             <AlertDescription>
-              Please wait... checking blockchain records and satellite cache.
+              Please wait... checking blockchain data.
             </AlertDescription>
           </Alert>
         );
@@ -123,7 +102,7 @@ export function VerifierTool() {
           </label>
           <Textarea
             id="qr-data"
-            placeholder='Paste data from scanned QR code here. For demo, try typing "valid", "invalid", or "revoked".'
+            placeholder='Paste an Ethereum address to verify. e.g., 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B'
             className="min-h-[120px]"
             value={qrData}
             onChange={(e) => setQrData(e.target.value)}
