@@ -51,7 +51,7 @@ export function MainSidebar() {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} passHref>
                 <SidebarMenuButton
-                  asChild
+                  as="a"
                   isActive={pathname === item.href}
                   tooltip={{
                     children: item.label,
@@ -61,10 +61,8 @@ export function MainSidebar() {
                     'group-data-[collapsible=icon]:justify-center'
                   )}
                 >
-                  <a>
-                    <item.icon className="shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </a>
+                  <item.icon className="shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
