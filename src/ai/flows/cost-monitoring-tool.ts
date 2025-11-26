@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getGasPrice } from '../tools/ethereum-tools';
 
 const EstimateRegistrationCostInputSchema = z.object({
   networkCongestion: z.string().describe('The current network congestion level (e.g., low, medium, high).'),
@@ -32,20 +33,31 @@ const prompt = ai.definePrompt({
   name: 'estimateRegistrationCostPrompt',
   input: {schema: EstimateRegistrationCostInputSchema},
   output: {schema: EstimateRegistrationCostOutputSchema},
-  prompt: `You are an AI assistant that estimates the cost of registering an identity on the blockchain and suggests optimal settings to reduce cost.
+  tools: [getGasPrice],
+  prompt: `You are an AI assistant that estimates the cost of registering an identity on the Ethereum blockchain and suggests optimal settings to reduce cost.
 
   Given the following information:
   - Network Congestion: {{{networkCongestion}}}
-  - Gas Price (Gwei): {{{gasPrice}}}
   - Data Size (bytes): {{{dataSize}}}
 
-  Provide an estimated cost in USD and suggest optimal settings to reduce cost.
-  Ensure the estimatedCostUSD is a number.
-  Consider that lower network congestion results in lower fees.
-  Data size directly impacts the gas used.
-  Gas price is a key factor in determining transaction cost.
+  Use the getGasPrice tool to fetch the current gas prices on the Ethereum network. The tool returns prices in Gwei for different speeds (safe, standard, fast).
+  
+  Based on the network congestion provided by the user, select the appropriate gas price from the tool's output:
+  - 'low' congestion -> use 'safe' gas price
+  - 'medium' congestion -> use 'standard' gas price
+  - 'high' congestion -> use 'fast' gas price
+  
+  Assume a base gas limit for a simple transaction (e.g., 21000 gas) and add an estimated cost per byte of data. A reasonable estimation is 68 gas per non-zero byte. For this calculation, assume all bytes are non-zero.
 
-  Ensure the suggestedSettings are clear, concise, and actionable.
+  Calculate the total transaction fee in ETH and then convert it to USD. You can use a rough, recent ETH to USD conversion rate (e.g., 1 ETH = $3500 USD).
+
+  Provide an estimated cost in USD and suggest optimal settings to reduce cost (e.g., waiting for lower congestion, reducing data size).
+  Ensure the estimatedCostUSD is a number.
+
+  Example Calculation:
+  1. Gas Limit = 21000 (base) + (dataSize * 68)
+  2. Transaction Fee (ETH) = (Gas Limit * Gas Price) / 1,000,000,000
+  3. Estimated Cost (USD) = Transaction Fee (ETH) * ETH_PRICE_USD
 `,
 });
 
